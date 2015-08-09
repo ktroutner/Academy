@@ -36,11 +36,11 @@ class Unit {
     bool moveFlag;
   public:
     Unit();
-    Unit(UnitInfo &inf);
+    Unit(UnitInfo inf);
     UnitInfo getInfo();
     Position getPosition();
-    bool hasMoved();
+    bool canMove();
     void setHp(int hp);
     void move(Position p);
-    void clearMoveFlag();
+    void refresh();
 };

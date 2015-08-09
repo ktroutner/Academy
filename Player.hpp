@@ -5,11 +5,11 @@ using namespace std;
 
 class Player {
     string name;
-    vector<Unit> units;
+    vector<Unit*> units;
   public:
-    Player(string nm, vector<Unit> us);
+    Player(string nm, vector<Unit*> us);
     string getName();
-    vector<Unit> getUnits();
+    vector<Unit*> getUnits();
     bool hasAvailableUnits();
     void refresh();
 };
