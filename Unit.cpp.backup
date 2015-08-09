@@ -1,0 +1,39 @@
+#include <iostream>
+#include "Unit.hpp"
+
+Unit::Unit() {
+    info = UnitInfo {"Player 1", "DefaultUnit", "Soldier", 10, 3, 1, 4, 1, {0,0}};
+    moveFlag = false;
+}
+
+Unit::Unit(UnitInfo &inf) {
+    info = inf;
+    pos = inf.startingPos;
+    moveFlag = false;
+}
+
+UnitInfo Unit::getInfo() {
+    return info;
+}
+
+Position Unit::getPosition() {
+    return pos;
+}
+
+bool Unit::hasMoved() {
+    return moveFlag;
+}
+
+void Unit::setHp(int hp) {
+    info.hp = hp;
+}
+
+void Unit::move(Position p) {
+    cout << moveFlag << "\n";
+    pos = p;
+    moveFlag = true;
+}
+
+void Unit::clearMoveFlag() {
+    moveFlag = false;
+}
