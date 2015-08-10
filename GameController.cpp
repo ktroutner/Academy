@@ -36,8 +36,8 @@ bool GameController::isOccupied(Position p) {
     return it != gameMap.end();
 }
 
-bool GameController::inMoveRange(Position fromPos, Position toPos, int moveRange) {
-    return abs(toPos.x - fromPos.x) + abs(toPos.y - fromPos.y) <= moveRange;
+bool GameController::inRange(Position fromPos, Position toPos, int range) {
+    return abs(toPos.x - fromPos.x) + abs(toPos.y - fromPos.y) <= range;
 }
 
 Unit GameController::getUnitAtPosition(Position p) {
@@ -49,6 +49,17 @@ void GameController::move(Unit* u, Position p) {
     u->move(p);
     gameMap.erase(oldp);
     gameMap[p] = u;
+}
+
+void GameController::attack(Unit* u, Unit* target) {
+    int damage = u->getInfo().atk - target->getInfo().def;
+    if (damage < 0)
+        damage = 0;
+    target->setHp(target->getInfo().hp - damage);
+    if (target->getInfo().hp <= 0) {
+        //TODO: delete unit from player list
+        gameMap.erase(target->getPosition());
+    }
 }
 
 void GameController::printState() {
@@ -149,7 +160,7 @@ int main() {
                 Position p = {x,y};
                 if (!control.isOccupied(p))
                 {
-                    if (control.inMoveRange(u->getPosition(), p, u->getInfo().moveRange)) {
+                    if (control.inRange(u->getPosition(), p, u->getInfo().moveRange)) {
                         cout << "Moving " << cur.getName() << "'s " << u->getInfo().name << " to position {" << p.x << "," << p.y << "}\n";
                         control.move(u, p);
                     } else 

@@ -15,8 +15,9 @@ class GameController {
     Player& getCurrentPlayer();
     bool isRunning();
     void move(Unit* u, Position p);
+    void attack(Unit* u, Unit* target);
     bool isOccupied(Position p);
-    bool inMoveRange(Position fromPos, Position toPos, int moveRange);
+    bool inRange(Position fromPos, Position toPos, int range);
     Unit getUnitAtPosition(Position p);
     void printState();
 };
