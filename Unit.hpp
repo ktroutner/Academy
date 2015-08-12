@@ -34,13 +34,16 @@ class Unit {
     //other unit info related to game state
     Position pos;
     bool moveFlag;
+    bool attackFlag;
   public:
     Unit();
     Unit(UnitInfo inf);
     UnitInfo getInfo();
     Position getPosition();
     bool canMove();
+    bool canAttack();
     void setHp(int hp);
     void move(Position p);
+    void finishMove();
     void refresh();
 };

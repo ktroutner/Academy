@@ -8,12 +8,14 @@ Unit::Unit() {
     info = defaultInfo;
     pos = defaultInfo.startingPos;
     moveFlag = true;
+    attackFlag = true;
 }
 
 Unit::Unit(UnitInfo inf) {
     info = inf;
     pos = inf.startingPos;
     moveFlag = true;
+    attackFlag = true;
 }
 
 UnitInfo Unit::getInfo() {
@@ -28,6 +30,10 @@ bool Unit::canMove() {
     return moveFlag;
 }
 
+bool Unit::canAttack() {
+    return attackFlag;
+}
+
 void Unit::setHp(int hp) {
     info.hp = hp;
 }
@@ -37,6 +43,12 @@ void Unit::move(Position p) {
     moveFlag = false;
 }
 
+void Unit::finishMove() {
+    moveFlag = false;
+    attackFlag = false;
+}
+
 void Unit::refresh() {
     moveFlag = true;
+    attackFlag = true;
 }

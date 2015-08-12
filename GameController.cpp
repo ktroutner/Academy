@@ -5,11 +5,11 @@
 #include "GameController.hpp"
 using namespace std;
 
-vector<Player> GameController::getPlayers() {
+vector<Player*> GameController::getPlayers() {
     return players;
 }
 
-Player& GameController::getCurrentPlayer() {
+Player* GameController::getCurrentPlayer() {
     return players.at(currentPlayerIdx);
 }
 
@@ -17,7 +17,7 @@ bool GameController::isRunning() {
     return gameRunning;
 }
 
-void GameController::startGame(map<Position,Unit*,PositionCompare> mp, vector<Player> ps) {
+void GameController::startGame(map<Position,Unit*,PositionCompare> mp, vector<Player*> ps) {
     gameMap = mp;
     players = ps;
     currentPlayerIdx = 0;
@@ -25,7 +25,7 @@ void GameController::startGame(map<Position,Unit*,PositionCompare> mp, vector<Pl
 }
 
 void GameController::nextPlayer() {
-    players.at(currentPlayerIdx).refresh();
+    players.at(currentPlayerIdx)->refresh();
     currentPlayerIdx++;
     if (currentPlayerIdx >= players.size())
         currentPlayerIdx = 0;
@@ -40,8 +40,8 @@ bool GameController::inRange(Position fromPos, Position toPos, int range) {
     return abs(toPos.x - fromPos.x) + abs(toPos.y - fromPos.y) <= range;
 }
 
-Unit GameController::getUnitAtPosition(Position p) {
-    return *gameMap.at(p);
+Unit* GameController::getUnitAtPosition(Position p) {
+    return gameMap.at(p);
 }
 
 void GameController::move(Unit* u, Position p) {
@@ -56,21 +56,24 @@ void GameController::attack(Unit* u, Unit* target) {
     if (damage < 0)
         damage = 0;
     target->setHp(target->getInfo().hp - damage);
+    cout << damage << " damage!\n";
     if (target->getInfo().hp <= 0) {
-        //TODO: delete unit from player list
+        //TODO: delete unit from player list (use pointers instead of strings)
         gameMap.erase(target->getPosition());
+        cout << target->getInfo().name << " killed!\n";
     }
+    u->finishMove();
 }
 
 void GameController::printState() {
-    Player cur = players.at(currentPlayerIdx);
+    Player* cur = players.at(currentPlayerIdx);
     cout << "= = = = = = = = = =\n";
     for (int i=0; i<=10; i++) {
         for (int j=0; j<=10; j++) {
             Position p = {i,j};
             if (isOccupied(p)) {
-                Unit u = getUnitAtPosition(p);
-                if (u.getInfo().player == cur.getName())
+                Unit* u = getUnitAtPosition(p);
+                if (u->getInfo().player == cur->getName())
                     cout << "O ";
                 else
                     cout << "X ";
@@ -109,29 +112,29 @@ int main() {
     vector<Unit*> p2Units = {&p2u1, &p2u2};
     vector<Unit*> p3Units = {&p3u1, &p3u2};
     vector<Unit*> p4Units = {&p4u1};
-    vector<Player> players;
+    vector<Player*> players;
     Player player1 = Player("Player 1", p1Units);
     Player player2 = Player("Player 2", p2Units);
     Player player3 = Player("Player 3", p3Units);
     Player player4 = Player("Player 4", p4Units);
-    players.push_back(player1);
-    players.push_back(player2);
-    players.push_back(player3);
-    players.push_back(player4);
+    players.push_back(&player1);
+    players.push_back(&player2);
+    players.push_back(&player3);
+    players.push_back(&player4);
     map<Position,Unit*,PositionCompare> mp;
     for (int i=0; i < players.size(); i++) {
-        for (int j=0; j < players.at(i).getUnits().size(); j++) {
-            Unit* u = players.at(i).getUnits().at(j);
+        for (int j=0; j < players.at(i)->getUnits().size(); j++) {
+            Unit* u = players.at(i)->getUnits().at(j);
             mp[u->getInfo().startingPos] = u;
         }
     }
     control.startGame(mp, players);
     while(control.isRunning()) {
         control.printState();
-        Player& cur = control.getCurrentPlayer();
-        vector<Unit*> units = cur.getUnits();
-        cout << cur.getName() << "'s turn\n";
-        if (!cur.hasAvailableUnits()) {
+        Player* cur = control.getCurrentPlayer();
+        vector<Unit*> units = cur->getUnits();
+        cout << cur->getName() << "'s turn\n";
+        if (!cur->hasAvailableUnits()) {
             string resp;
             cout << "You have no remaining units to move. Do you want to end your turn? ";
             getline(cin, resp);
@@ -147,7 +150,7 @@ int main() {
             control.nextPlayer();
         else if (command.substr(0,4) == "move") {
             int i  = stoi(command.substr(4));
-            Unit* u = cur.getUnits().at(i);
+            Unit* u = cur->getUnits().at(i);
             if (u->canMove()) {
                 string xStr, yStr;
                 int x,y;
@@ -161,14 +164,41 @@ int main() {
                 if (!control.isOccupied(p))
                 {
                     if (control.inRange(u->getPosition(), p, u->getInfo().moveRange)) {
-                        cout << "Moving " << cur.getName() << "'s " << u->getInfo().name << " to position {" << p.x << "," << p.y << "}\n";
+                        cout << "Moving " << cur->getName() << "'s " << u->getInfo().name << " to position {" << p.x << "," << p.y << "}\n";
                         control.move(u, p);
                     } else 
-                        cout << "This position is not in range.  Please select a different position\n";
+                        cout << "This position is not in range.  Please select a different position.\n";
                 } else
-                    cout << "This position is occupied. Please select a different position\n";
+                    cout << "This position is occupied. Please select a different position.\n";
             } else
-               cout << "This unit has already moved.  Please select a different unit\n"; 
+               cout << "This unit has already moved.  Please select a different unit.\n"; 
+        } else if (command.substr(0,6) == "attack") {
+            int i = stoi(command.substr(6));
+            Unit* u = cur->getUnits().at(i);
+            if (u->canAttack()) {
+                string xStr, yStr;
+                int x,y;
+                cout << "X Position: ";
+                getline(cin, xStr);
+                cout << "Y Position: ";
+                getline(cin, yStr);
+                stringstream(xStr) >> x;
+                stringstream(yStr) >> y;
+                Position p = {x,y};
+                if (control.inRange(u->getPosition(), p, u->getInfo().range)) {
+                    if (control.isOccupied(p)) {
+                        Unit* target = control.getUnitAtPosition(p);
+                        if (u->getInfo().player != target->getInfo().player) {
+                            cout << cur->getName() << "'s " << u->getInfo().name << " attacks " << target->getInfo().player << "'s " << target->getInfo().name << "!\n";
+                            control.attack(u, target);
+                        } else 
+                            cout << "This unit is on your side!  Please select a different unit to attack.\n";
+                    } else
+                        cout << "There is no unit at this position.  Please select a different position to attack.\n";
+                } else 
+                    cout << "This position is not in range.  Please select a different position to attack.\n";
+            } else
+                cout << "This unit is not able to attack. Please select a different command.\n";
         } else if (command.substr(0,2) == "hp") {
             int i = stoi(command.substr(2));
             cout << units.at(i)->getInfo().hp << "\n";
@@ -187,8 +217,8 @@ int main() {
             stringstream(yStr) >> y;
             Position p = {x,y};
             if (control.isOccupied(p)) {
-                Unit u = control.getUnitAtPosition(p);
-                cout << u.getInfo().name << "\n";
+                Unit* u = control.getUnitAtPosition(p);
+                cout << u->getInfo().name << "\n";
             } else
                 cout << "This position is empty.\n";
         } else if (command == "quit")
