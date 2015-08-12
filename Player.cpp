@@ -4,9 +4,19 @@
 #include "Player.hpp"
 using namespace std;
 
-Player::Player(string nm, vector<Unit*> us) {
+Player::Player(string nm) {
     name = nm;
-    units = us;
+}
+
+void Player::addUnit(Unit* u) {
+    units.push_back(u);
+}
+
+void Player::removeUnit(Unit* u) {
+    for (int i=0; i<units.size(); i++) {
+        if (units.at(i) == u)
+            units.erase(units.begin()+i);
+    }
 }
 
 string Player::getName() {

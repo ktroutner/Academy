@@ -1,10 +1,10 @@
 #include <vector>
 #include <string>
-#include "Unit.hpp"
+#include "Player.hpp"
 using namespace std;
 
 Unit::Unit() {
-    UnitInfo defaultInfo = {"DefaultPlayer", "Default", "Soldier", 10, 1, 1, 1, 1, {0,0}};
+    UnitInfo defaultInfo = {nullptr, "Default", "Soldier", 10, 1, 1, 1, 1, {0,0}};
     info = defaultInfo;
     pos = defaultInfo.startingPos;
     moveFlag = true;

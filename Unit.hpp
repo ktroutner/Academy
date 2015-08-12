@@ -2,6 +2,8 @@
 #include <string>
 using namespace std;
 
+class Player;
+
 struct Position {
     int x;
     int y;
@@ -18,7 +20,7 @@ struct PositionCompare {
 
 //basic unit info
 struct UnitInfo {
-    string player;
+    Player* player;
     string name;
     string type;
     int hp;
